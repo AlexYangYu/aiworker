@@ -1,0 +1,20 @@
+digraph AbstractResourceTopology {
+    rankdir=TB;
+    node [shape=box, style=rounded, fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    VPC [label="VPC"];
+    Subnet [label="Subnet"];
+    Instance [label="Instance"];
+    Port [label="Port"];
+    SecurityGroup [label="Security Group"];
+
+    // Containment and Association Hierarchy
+    VPC -> Subnet [label=" contains (1..*)"];
+    Subnet -> Port [label=" contains (1..*)"];
+    Instance -> Port [label=" uses (1..*)"];
+    
+    // Security Association
+    Port -> SecurityGroup [label=" is secured by (*..*)", style=dashed];
+    Instance -> SecurityGroup [label=" is secured by (*..*)", style=dashed];
+}
