@@ -1,0 +1,84 @@
+digraph AliyunResourceTopology {
+    // Graph attributes
+    graph [rankdir=TB, fontname="Arial", fontsize=12, label="阿里云资源类型关系拓扑图", labelloc=t];
+    node [shape=box, style="rounded,filled", fillcolor=lightblue, fontname="Arial"];
+    edge [fontname="Arial", fontsize=10];
+
+    // Define nodes by category
+
+    // Infrastructure Layer
+    Region [label="Region\n(地域)", fillcolor="#FFE4B5"];
+    AvailabilityZone [label="Availability Zone\n(可用区)", fillcolor="#FFE4B5"];
+
+    // Network Layer
+    VPC [label="VPC\n(专有网络)", fillcolor="#87CEEB"];
+    vRouter [label="vRouter\n(虚拟路由器)", fillcolor="#87CEEB"];
+    RouteTable [label="Route Table\n(路由表)", fillcolor="#87CEEB"];
+    vSwitch [label="vSwitch\n(交换机)", fillcolor="#87CEEB"];
+    NetworkACL [label="NetworkACL\n(网络ACL)", fillcolor="#87CEEB"];
+    SecurityGroup [label="SecurityGroup\n(安全组)", fillcolor="#87CEEB"];
+
+    // Compute & Network Interface Layer
+    Instance [label="Instance\n(ECS实例)", fillcolor="#98FB98"];
+    ENI [label="ENI\n(弹性网卡)", fillcolor="#98FB98"];
+
+    // Infrastructure relationships
+    Region -> AvailabilityZone [label="1..*\n包含", color="#FF6347"];
+
+    // Region to core services (parallel)
+    Region -> VPC [label="1..*\nVPC服务", color="#4169E1", style=bold];
+    Region -> Instance [label="1..*\nECS服务", color="#4169E1", style=bold];
+
+    // VPC internal structure
+    VPC -> vRouter [label="1..1\n自动创建", color="#1E90FF"];
+    vRouter -> RouteTable [label="1..*\n管理", color="#1E90FF"];
+    VPC -> vSwitch [label="1..*\n包含", color="#1E90FF"];
+    VPC -> SecurityGroup [label="1..*\n包含", color="#1E90FF"];
+    VPC -> NetworkACL [label="1..*\n包含", color="#1E90FF"];
+
+    // vSwitch relationships
+    vSwitch -> AvailabilityZone [label="*..*\n属于", color="#FF6347", dir=back];
+    vSwitch -> RouteTable [label="*..1\n关联", color="#1E90FF"];
+    vSwitch -> NetworkACL [label="*..1\n(可选)关联", color="#1E90FF", style=dashed];
+
+    // Instance relationships
+    Instance -> AvailabilityZone [label="*..1\n部署于", color="#FF6347"];
+    Instance -> vSwitch [label="*..1\n连接", color="#32CD32"];
+    Instance -> SecurityGroup [label="*..*\n加入", color="#32CD32"];
+    Instance -> ENI [label="1..*\n拥有", color="#32CD32"];
+
+    // ENI relationships
+    ENI -> vSwitch [label="*..1\n获取IP", color="#32CD32"];
+    ENI -> SecurityGroup [label="*..*\n受控于", color="#32CD32"];
+
+    // Legend
+    subgraph cluster_legend {
+        label="图例说明";
+        style=filled;
+        fillcolor="#F5F5F5";
+
+        legend_infra [label="基础设施层", fillcolor="#FFE4B5"];
+        legend_network [label="网络服务层", fillcolor="#87CEEB"];
+        legend_compute [label="计算资源层", fillcolor="#98FB98"];
+
+        legend_infra -> legend_network [style=invis];
+        legend_network -> legend_compute [style=invis];
+    }
+
+    // Notes box
+    subgraph cluster_notes {
+        label="数量关系说明";
+        style=filled;
+        fillcolor="#FFFACD";
+
+        note [shape=note, label="
+1..1  = 一对一\l
+1..*  = 一对多\l
+*..1  = 多对一\l
+*..* = 多对多\l
+\l
+实线 = 强关联\l
+虚线 = 可选关联\l
+        ", fillcolor="#FFFACD"];
+    }
+}
