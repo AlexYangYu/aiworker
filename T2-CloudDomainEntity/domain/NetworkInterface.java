@@ -1,87 +1,96 @@
-package domain;
+public class NetworkInterface extends Entity {
 
-import java.util.ArrayList;
-import java.util.List;
+    public static final String ENTITY_TYPE = "CENI";
 
-/**
- * 网络接口（NetworkInterface / ENI / Port）
- * 实例的虚拟网络接口卡
- * - 阿里云称为ENI（Elastic Network Interface）
- * - 华为云称为Port
- */
-public class NetworkInterface extends BaseCloudResource {
-    /**
-     * 所属VPC的ID
-     */
-    public String vpcId;
+    // 设备ID
+    private UUID deviceId;
 
-    /**
-     * 所属子网ID（阿里云为VSwitchId，华为云为NetworkId）
-     */
-    public String subnetId;
+    // 云服务商
+    private CloudProvider cloudProvider;
 
-    /**
-     * MAC地址
-     */
-    public String macAddress;
+    // 网卡所在区域
+    private String region;
 
-    /**
-     * 主IP地址
-     */
-    public String primaryIpAddress;
+    // 网卡所在可用区
+    private String availabilityZone;
 
-    /**
-     * 所有私有IP地址列表
-     */
-    public List<String> privateIpAddresses = new ArrayList<>();
+    // 网卡ID
+    private String networkInterfaceId;
 
-    /**
-     * IPv6地址列表
-     */
-    public List<String> ipv6Addresses = new ArrayList<>();
+    // 网卡类型
+    private String type;
 
-    /**
-     * 关联的安全组ID列表
-     */
-    public List<String> securityGroupIds = new ArrayList<>();
+    // 网卡名称
+    private String name;
 
-    /**
-     * 绑定的实例ID
-     */
-    public String instanceId;
+    // 网卡状态
+    private String status;
 
-    /**
-     * 设备所有者类型（如：compute:zone-a, network:router_interface_distributed）
-     */
-    public String deviceOwner;
+    // MAC地址
+    private Mac macAddress;
 
-    /**
-     * 接口类型（Primary主网卡 / Secondary辅助网卡）
-     */
-    public String interfaceType;
+    // 主私网IP地址
+    private INet primaryIp;
 
-    /**
-     * 是否为主网络接口
-     */
-    public boolean isPrimary;
+    // 私网IP地址列表
+    private List<INet> privateIps = new ArrayList<>();
 
-    /**
-     * 是否启用源/目标检查
-     */
-    public boolean sourceDestCheck;
+    // 绑定的公网IP
+    private List<INet> publicIps = new ArrayList<>();
+
+    // 所属VPC ID
+    private String vpcId;
+
+    // 所属交换机ID
+    private String vSwitchId;
+
+    // 关联的实例ID
+    private String instanceId;
+
+    // 关联的安全组ID列表
+    private List<String> securityGroupIds = new ArrayList<>();
+
+    // 云上的创建时间
+    private Date createdAtCloud;
+
+    // 描述
+    private String description;
+
+    // 在iNet的创建时间
+    private Date createTime;
+
+    // 在iNet的更新时间
+    private Date updateTime;
+
+    // Tags
+    private Map<String, String> tags = new HashMap<>();
 
     /**
-     * 管理状态（是否启用）
+     * 其它需要存储的属性
+     * key: 属性名称
+     * value: 属性值
      */
-    public boolean adminStateUp;
+    private Map<String, Option<?>> options = new HashMap<>();
+
+    @Override
+    public String getEntityType() {
+        // Cloud ENI
+        return ENTITY_TYPE;
+    }
 
     /**
-     * 是否启用端口安全
+     * 获取网卡的唯一标识键
+     * <p>
+     * 组合格式：cloudProvider:region:networkInterfaceId
+     * 例如：ALIYUN:cn-hangzhou:eni-bp1234567890abcde
+     * </p>
+     *
+     * @return 唯一标识键
      */
-    public boolean portSecurityEnabled;
-
-    /**
-     * 绑定的虚拟网卡类型（如：normal, direct, macvtap）
-     */
-    public String vnicType;
+    public String getUniqueKey() {
+        if (cloudProvider == null || region == null || networkInterfaceId == null) {
+            throw new IllegalStateException("cloudProvider, region, and networkInterfaceId must not be null");
+        }
+        return cloudProvider.getCode() + ":" + region + ":" + networkInterfaceId;
+    }
 }
